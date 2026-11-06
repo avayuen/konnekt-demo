@@ -240,6 +240,14 @@ svg.i.sm { width: 14px; height: 14px; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .divider:empty { gap: 0; margin-top: 6px; }
 .joined { align-self: center; display: inline-flex; align-items: center; gap: 6px; margin: -4px 0 4px; background: var(--tint); color: var(--accent); font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 999px; text-align: center; }
+.readbtn { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 600; font-size: 13px; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.readbtn:hover { text-decoration-thickness: 2px; }
+.readbtn svg { transition: transform .15s; }
+.readbtn:hover svg { transform: translateX(2px); }
+.lead { margin: 0; line-height: 1.5; font-size: 15px; }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: flex; flex-direction: column; gap: 14px; }
+.steps li { counter-increment: s; display: flex; gap: 12px; line-height: 1.45; font-size: 14.5px; }
+.steps li::before { content: counter(s); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--tint); color: var(--accent); display: grid; place-items: center; font-family: var(--mono); font-size: 12px; font-weight: 600; }
 .replay { align-self: flex-start; font-size: 13px; font-weight: 600; color: var(--accent); padding: 0; text-decoration: underline; text-underline-offset: 3px; }
 
 @media (max-width: 900px) { .intro { display: none; } }
@@ -320,7 +328,8 @@ svg.i.sm { width: 14px; height: 14px; }
       expTitle: 'Ask an expert', expSub: 'Free · answers in your language', online: 'Online', typing: 'typing',
       back: 'Experts', askAbout: 'Ask about', fine: 'Konnekt gives information, not legal or medical advice. Experts are from our partner organizations.',
       sent: 'Sent', reset: 'Reset chat', resetDone: 'Chat reset',
-      history: 'Previous community chat history', joined: '{name} just joined the Konnekt community!'
+      history: 'Previous community chat history', joined: '{name} just joined the Konnekt community!',
+      readGuide: 'Read guide', minRead: '2 min read', steps: 'What to do', haveQ: 'Have a question about this?', askName: 'Ask {name}'
     },
     bn: {
       lang_en: 'ইংরেজি', lang_bn: 'বাংলা', lang_es: 'স্প্যানিশ',
@@ -337,7 +346,8 @@ svg.i.sm { width: 14px; height: 14px; }
       expTitle: 'বিশেষজ্ঞকে জিজ্ঞাসা করুন', expSub: 'বিনামূল্যে · আপনার ভাষায় উত্তর', online: 'অনলাইন', typing: 'লিখছেন',
       back: 'বিশেষজ্ঞ', askAbout: 'জিজ্ঞাসা করুন', fine: 'Konnekt তথ্য দেয়, আইনি বা চিকিৎসা পরামর্শ নয়। বিশেষজ্ঞরা আমাদের অংশীদার সংস্থার।',
       sent: 'পাঠানো হয়েছে', reset: 'চ্যাট রিসেট', resetDone: 'চ্যাট রিসেট হয়েছে',
-      history: 'আগের কমিউনিটি চ্যাট', joined: '{name} এইমাত্র Konnekt কমিউনিটিতে যোগ দিয়েছেন!'
+      history: 'আগের কমিউনিটি চ্যাট', joined: '{name} এইমাত্র Konnekt কমিউনিটিতে যোগ দিয়েছেন!',
+      readGuide: 'গাইড পড়ুন', minRead: '২ মিনিটে পড়া যায়', steps: 'কী করবেন', haveQ: 'এ বিষয়ে কোনো প্রশ্ন আছে?', askName: '{name}-কে জিজ্ঞাসা করুন'
     },
     es: {
       lang_en: 'inglés', lang_bn: 'bengalí', lang_es: 'español',
@@ -354,7 +364,8 @@ svg.i.sm { width: 14px; height: 14px; }
       expTitle: 'Pregunta a un experto', expSub: 'Gratis · respuestas en tu idioma', online: 'En línea', typing: 'escribiendo',
       back: 'Expertos', askAbout: 'Preguntar', fine: 'Konnekt da información, no asesoría legal ni médica. Los expertos son de organizaciones aliadas.',
       sent: 'Enviado', reset: 'Reiniciar chat', resetDone: 'Chat reiniciado',
-      history: 'Historial del chat de la comunidad', joined: '¡{name} se acaba de unir a la comunidad de Konnekt!'
+      history: 'Historial del chat de la comunidad', joined: '¡{name} se acaba de unir a la comunidad de Konnekt!',
+      readGuide: 'Leer guía', minRead: 'Lectura de 2 min', steps: 'Qué hacer', haveQ: '¿Tienes una pregunta sobre esto?', askName: 'Preguntar a {name}'
     }
   };
 
@@ -467,7 +478,7 @@ svg.i.sm { width: 14px; height: 14px; }
   var S = {
     lang: 'en', tab: 'home', uber: 0, lyft: 0,
     msgs: MSGS.slice(), usedQuick: {}, showOrig: {}, typing: null,
-    name: '', borough: 'queens', resCat: 'money', liked: {}, expert: null, chats: {}, expTyping: null, askedQ: {}, gen: 0
+    name: '', borough: 'queens', resCat: 'money', guide: null, liked: {}, expert: null, chats: {}, expTyping: null, askedQ: {}, gen: 0
   };
   try { var saved = localStorage.getItem('gc-lang'); if (saved && L[saved]) S.lang = saved; } catch (e) {}
 
@@ -549,7 +560,53 @@ svg.i.sm { width: 14px; height: 14px; }
       '</form></div>';
   }
 
+  var GUIDES = {
+    r1: { exp: 'fin', g: {
+      en: ['Look back at your last 3 months and find your lowest month. That is your base budget.', 'Pay the must-haves first: rent, car payment, insurance and phone.', 'In good weeks, move the extra into savings before you spend it.', 'Check your budget every Sunday and adjust it for the week ahead.'],
+      bn: ['গত ৩ মাসের আয় দেখে সবচেয়ে কম আয়ের মাসটি খুঁজুন। সেটিই আপনার মূল বাজেট।', 'আগে জরুরি খরচগুলো দিন: ভাড়া, গাড়ির কিস্তি, বিমা আর ফোন।', 'ভালো সপ্তাহে বাড়তি টাকা খরচ করার আগেই সঞ্চয়ে সরিয়ে রাখুন।', 'প্রতি রবিবার বাজেট দেখে সামনের সপ্তাহের জন্য ঠিক করে নিন।'],
+      es: ['Revisa tus últimos 3 meses y busca el mes más flojo. Ese es tu presupuesto base.', 'Paga primero lo esencial: renta, pago del carro, seguro y teléfono.', 'En las semanas buenas, pasa lo extra a tus ahorros antes de gastarlo.', 'Revisa tu presupuesto cada domingo y ajústalo para la semana.'] } },
+    r2: { exp: 'fin', g: {
+      en: ['Uber and Lyft do not take taxes out of your pay. Many drivers set aside 25–30% of what they earn.', 'If you expect to owe $1,000 or more for the year, pay estimated taxes four times a year.', 'Track every mile you drive for work. Mileage can lower what you owe.', 'Keep your 1099 forms and app earnings summaries in one folder.'],
+      bn: ['উবার ও লিফট আপনার আয় থেকে কর কাটে না। অনেক চালক আয়ের ২৫–৩০% আলাদা রাখেন।', 'বছরে $1,000 বা তার বেশি কর দিতে হবে মনে হলে বছরে চারবার আনুমানিক কর দিন।', 'কাজের জন্য চালানো প্রতিটি মাইল লিখে রাখুন। মাইলেজ আপনার কর কমাতে পারে।', 'আপনার 1099 ফর্ম আর অ্যাপের আয়ের হিসাব এক ফোল্ডারে রাখুন।'],
+      es: ['Uber y Lyft no te descuentan impuestos. Muchos conductores apartan entre 25 y 30 % de lo que ganan.', 'Si esperas deber $1,000 o más en el año, paga impuestos estimados cuatro veces al año.', 'Anota cada milla que manejas por trabajo. El millaje puede bajar lo que debes.', 'Guarda tus formularios 1099 y los resúmenes de ganancias de las apps en una sola carpeta.'] } },
+    r3: { exp: 'health', g: {
+      en: ['Work-hour rules may ask for 80 hours a month of work or other approved activities.', 'Log your hours from every app each week in the Konnekt tracker.', 'Save your weekly earnings summaries as proof of your hours.', 'If you are sick, caring for someone or in school, ask a health navigator whether you qualify for an exemption.'],
+      bn: ['কাজের ঘণ্টার নিয়মে মাসে ৮০ ঘণ্টা কাজ বা অন্য অনুমোদিত কার্যক্রম লাগতে পারে।', 'প্রতি সপ্তাহে সব অ্যাপের ঘণ্টা Konnekt ট্র্যাকারে লিখে রাখুন।', 'ঘণ্টার প্রমাণ হিসেবে সাপ্তাহিক আয়ের হিসাব সংরক্ষণ করুন।', 'অসুস্থ হলে, কারও দেখাশোনা করলে বা পড়াশোনা করলে, ছাড় পাবেন কি না স্বাস্থ্য সহায়ককে জিজ্ঞাসা করুন।'],
+      es: ['Las reglas de horas de trabajo pueden pedir 80 horas al mes de trabajo u otras actividades aprobadas.', 'Registra cada semana tus horas de todas las apps en el contador de Konnekt.', 'Guarda tus resúmenes semanales de ganancias como prueba de tus horas.', 'Si estás enfermo, cuidas a alguien o estudias, pregunta a una navegadora de salud si calificas para una exención.'] } },
+    r4: { exp: 'health', g: {
+      en: ['NYC Health + Hospitals sees patients regardless of ability to pay.', 'NYC Care offers low-cost care to New Yorkers who can’t get health insurance. Call 311 to learn more.', 'At the front desk, ask about financial help. Costs can be based on your income.', 'For urgent problems that are not emergencies, try a clinic before the ER.'],
+      bn: ['NYC Health + Hospitals টাকা দেওয়ার সামর্থ্য না থাকলেও রোগী দেখে।', 'যাঁরা স্বাস্থ্য বিমা পান না, তাঁদের জন্য NYC Care কম খরচে চিকিৎসা দেয়। আরও জানতে 311-এ ফোন করুন।', 'রিসেপশনে আর্থিক সহায়তার কথা জিজ্ঞাসা করুন। খরচ আপনার আয়ের ওপর নির্ভর করতে পারে।', 'জরুরি কিন্তু ইমার্জেন্সি নয় এমন সমস্যায় আগে ক্লিনিকে যান।'],
+      es: ['NYC Health + Hospitals atiende a pacientes sin importar si pueden pagar.', 'NYC Care ofrece atención de bajo costo a neoyorquinos que no pueden obtener seguro médico. Llama al 311 para saber más.', 'En la recepción, pregunta por ayuda financiera. El costo puede depender de tus ingresos.', 'Para problemas urgentes que no son emergencias, ve a una clínica antes que a la sala de emergencias.'] } },
+    r5: { exp: 'legal', g: {
+      en: ['TLC rules require 72 hours’ notice before a lockout.', 'Screenshot the notice as soon as you get it.', 'Save your trip records, ratings and any messages from the app.', 'Talk to a legal aid lawyer before you respond.'],
+      bn: ['TLC নিয়মে লকআউটের আগে ৭২ ঘণ্টার নোটিশ দিতে হয়।', 'নোটিশ পাওয়ামাত্র স্ক্রিনশট নিন।', 'আপনার ট্রিপের রেকর্ড, রেটিং আর অ্যাপের সব মেসেজ সংরক্ষণ করুন।', 'উত্তর দেওয়ার আগে আইনি সহায়তা আইনজীবীর সাথে কথা বলুন।'],
+      es: ['Las reglas de la TLC exigen un aviso de 72 horas antes de un bloqueo.', 'Toma captura del aviso en cuanto lo recibas.', 'Guarda tus registros de viajes, calificaciones y mensajes de la app.', 'Habla con un abogado de ayuda legal antes de responder.'] } },
+    r6: { exp: 'legal', g: {
+      en: ['Screenshot the fare breakdown after every trip.', 'Compare your pay with the TLC minimum pay rate for the trip’s time and distance.', 'Keep a simple log: date, trip time, miles and pay.', 'If other drivers see the same problem, report it together. It is easier to prove.'],
+      bn: ['প্রতিটি ট্রিপের পর ভাড়ার বিবরণের স্ক্রিনশট নিন।', 'ট্রিপের সময় ও দূরত্ব অনুযায়ী TLC-র ন্যূনতম হারের সাথে আপনার আয় মিলিয়ে দেখুন।', 'একটি সহজ হিসাব রাখুন: তারিখ, ট্রিপের সময়, মাইল আর আয়।', 'অন্য চালকেরাও একই সমস্যা দেখলে একসাথে রিপোর্ট করুন। তাতে প্রমাণ করা সহজ হয়।'],
+      es: ['Toma captura del desglose de la tarifa después de cada viaje.', 'Compara tu pago con la tarifa mínima de la TLC según el tiempo y la distancia del viaje.', 'Lleva un registro sencillo: fecha, tiempo del viaje, millas y pago.', 'Si otros conductores ven el mismo problema, repórtenlo juntos. Es más fácil de probar.'] } }
+  };
+
+  function renderGuide() {
+    var r = RES.filter(function (x) { return x.id === S.guide; })[0], G = GUIDES[r.id];
+    var e = EXPERTS.filter(function (x) { return x.id === G.exp; })[0];
+    var liked = !!S.liked[r.id], n = r.likes + (liked ? 1 : 0);
+    return '<div class="view">' +
+      '<button class="back" data-resback="1">' + ic('back', 'sm') + t('navResources') + '</button>' +
+      '<div class="pagehead"><span class="pill" style="margin-bottom:8px">' + t(r.cat) + '</span><h2>' + esc(r.t[S.lang]) + '</h2>' +
+        '<p style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><span class="by' + (r.pro ? ' pro' : '') + '">' + (r.pro ? ic('check', 'sm') + t('byPro') : ic('users', 'sm') + t('byDriver')) + '</span> · <span>' + t('minRead') + '</span></p></div>' +
+      '<p class="lead">' + esc(r.s[S.lang]) + '</p>' +
+      '<div class="card"><p class="label" style="margin-bottom:12px">' + t('steps') + '</p><ol class="steps">' +
+        G.g[S.lang].map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></div>' +
+      '<div style="display:flex;justify-content:flex-end;margin-top:-4px"><button class="like" id="like-' + r.id + '" data-like="' + r.id + '" aria-pressed="' + liked + '">' + ic('heart', 'sm') + num(n) + '</button></div>' +
+      '<p class="sect">' + t('haveQ') + '</p>' +
+      '<button class="card expert" data-askexp="' + e.id + '"><span class="avatar">' + e.initials + '</span><span class="who"><strong>' + esc(t('askName', { name: e.name })) + '</strong><small>' + esc(e.role[S.lang]) + '</small></span><span class="online">' + t('online') + '</span></button>' +
+      '<p class="fine">' + t('fine') + '</p>' +
+    '</div>';
+  }
+
   function renderResources() {
+    if (S.guide) return renderGuide();
     var list = RES.filter(function (r) { return r.cat === S.resCat; });
     return '<div class="view">' +
       '<div class="pagehead"><h2>' + t('resTitle') + '</h2><p>' + t('resSub') + '</p></div>' +
@@ -558,6 +615,7 @@ svg.i.sm { width: 14px; height: 14px; }
       list.map(function (r) {
         var liked = !!S.liked[r.id], n = r.likes + (liked ? 1 : 0);
         return '<article class="card res"><h3>' + esc(r.t[S.lang]) + '</h3><p>' + esc(r.s[S.lang]) + '</p>' +
+          '<button class="readbtn" data-guide="' + r.id + '">' + t('readGuide') + ic('arrow', 'sm') + '</button>' +
           '<div class="foot"><span class="by' + (r.pro ? ' pro' : '') + '">' + (r.pro ? ic('check', 'sm') + t('byPro') : ic('users', 'sm') + t('byDriver')) + '</span>' +
           '<button class="like" id="like-' + r.id + '" data-like="' + r.id + '" aria-pressed="' + liked + '">' + ic('heart', 'sm') + num(n) + '</button></div></article>';
       }).join('') +
@@ -655,7 +713,10 @@ svg.i.sm { width: 14px; height: 14px; }
     if (!b) return;
     var d = b.dataset;
     if (d.lang) { S.lang = d.lang; try { localStorage.setItem('gc-lang', d.lang); } catch (e) {} render(true); return; }
-    if (d.go) { go(d.go); return; }
+    if (d.go) { if (d.go === 'resources') S.guide = null; go(d.go); return; }
+    if (d.guide) { S.guide = d.guide; render(false); return; }
+    if (d.resback) { S.guide = null; render(false); return; }
+    if (d.askexp) { S.expert = d.askexp; go('experts'); return; }
     if (d.add) {
       if (hours() >= 80) return;
       S[d.add] = Math.min(S[d.add] + 1, S[d.add] + (80 - hours()));
