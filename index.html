@@ -244,6 +244,9 @@ svg.i.sm { width: 14px; height: 14px; }
 .readbtn:hover { text-decoration-thickness: 2px; }
 .readbtn svg { transition: transform .15s; }
 .readbtn:hover svg { transform: translateX(2px); }
+.reslink { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; background: var(--surface); border: 1px solid var(--accent); color: var(--accent); border-radius: 12px; padding: 9px 12px; font-weight: 700; font-size: 13px; text-align: left; transition: background .15s; }
+.reslink span { flex: 1; }
+.reslink:hover { background: var(--tint); }
 .lead { margin: 0; line-height: 1.5; font-size: 15px; }
 .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: flex; flex-direction: column; gap: 14px; }
 .steps li { counter-increment: s; display: flex; gap: 12px; line-height: 1.45; font-size: 14.5px; }
@@ -420,6 +423,21 @@ svg.i.sm { width: 14px; height: 14px; }
       es: '¡Qué bueno tenerte aquí! En Recursos hay guías de pago, salud y derechos, y los Expertos responden en tu idioma.' } }
   ];
 
+  var MEDICAL = [
+    { who: 'Farhana B.', from: 'bn', text: {
+      bn: 'বিমা ছাড়াই আমি এলমহার্স্ট হাসপাতালে ডাক্তার দেখাই। ওরা আয় অনুযায়ী খরচ নেয়।',
+      en: 'I don’t have insurance and I go to Elmhurst Hospital. They charge based on what you earn.',
+      es: 'No tengo seguro y voy al Hospital Elmhurst. Te cobran según lo que ganas.' } },
+    { who: 'Carlos M.', from: 'es', text: {
+      es: 'Yo me inscribí en NYC Care llamando al 311. Ahora pago muy poco por mis citas.',
+      en: 'I signed up for NYC Care by calling 311. Now I pay very little for my visits.',
+      bn: 'আমি 311-এ ফোন করে NYC Care-এ নাম লিখিয়েছি। এখন ডাক্তার দেখাতে খুব কম খরচ হয়।' } },
+    { who: 'Amina K.', role: 'peer', from: 'en', verified: true, src: 'NYC Health + Hospitals', link: 'r4', text: {
+      en: 'Good question! NYC Health + Hospitals sees patients regardless of ability to pay, and NYC Care offers low-cost care if you can’t get insurance. This guide walks you through it step by step.',
+      bn: 'ভালো প্রশ্ন! NYC Health + Hospitals টাকা দেওয়ার সামর্থ্য না থাকলেও রোগী দেখে, আর বিমা না পেলে NYC Care কম খরচে চিকিৎসা দেয়। এই গাইডে ধাপে ধাপে সব আছে।',
+      es: '¡Buena pregunta! NYC Health + Hospitals atiende sin importar si puedes pagar, y NYC Care ofrece atención de bajo costo si no puedes obtener seguro. Esta guía te lo explica paso a paso.' } }
+  ];
+
   var RES = [
     { id: 'r1', cat: 'money', pro: false, likes: 128,
       t: { en: 'Budgeting on uneven pay', bn: 'অনিয়মিত আয়ে বাজেট', es: 'Presupuesto con ingresos variables' },
@@ -511,7 +529,8 @@ svg.i.sm { width: 14px; height: 14px; }
     var meta = '<div class="meta"><b>' + esc(m.who) + '</b>' + (m.role === 'peer' ? '<span class="pill" style="padding:2px 8px;font-size:10.5px">' + t('peer') + '</span>' : '') +
       (translated ? '<span>' + t('translatedFrom', { l: t('lang_' + m.from) }) + '</span> · <button class="linkbtn" data-orig="' + i + '">' + (S.showOrig[i] ? t('hideOrig') : t('seeOrig')) + '</button>' : '') + '</div>';
     var body = (m.verified ? '<div class="vtag">' + ic('check', 'sm') + t('verified') + '</div>' : '') + esc(m.text[S.lang]) +
-      (m.src ? '<span class="src">' + t('source') + ': ' + esc(m.src) + '</span>' : '');
+      (m.src ? '<span class="src">' + t('source') + ': ' + esc(m.src) + '</span>' : '') +
+      (m.link ? '<button class="reslink" data-openguide="' + m.link + '">' + ic('book', 'sm') + '<span>' + esc(RES.filter(function (r) { return r.id === m.link; })[0].t[S.lang]) + '</span>' + ic('arrow', 'sm') + '</button>' : '');
     return '<div class="msg' + (m.verified ? ' verified' : '') + '">' + meta + '<div class="bubble">' + body + '</div>' +
       (translated && S.showOrig[i] ? '<div class="orig">' + esc(m.text[m.from]) + '</div>' : '') + '</div>';
   }
@@ -556,7 +575,7 @@ svg.i.sm { width: 14px; height: 14px; }
         (S.typing ? '<div class="meta" style="font-size:11.5px;color:var(--muted)">' + esc(S.typing) + ' · ' + t('typing') + '</div><div class="typing"><span></span><span></span><span></span></div>' : '') +
       '</div>' +
       '<form class="composer" id="post-form">' + (chips ? '<div class="chips">' + chips + '</div>' : '') +
-        '<div class="inputrow"><input id="post-input" autocomplete="off" placeholder="' + t('placeholder') + '" aria-label="' + t('placeholder') + '"><button class="send" type="submit" aria-label="Send">' + ic('send') + '</button></div>' +
+        '<div class="inputrow"><input id="post-input" autocomplete="off" placeholder="' + t('placeholder') + '" aria-label="' + t('placeholder') + '"><button class="send" type="button" aria-label="Send">' + ic('send') + '</button></div>' +
       '</form></div>';
   }
 
@@ -643,7 +662,7 @@ svg.i.sm { width: 14px; height: 14px; }
         return '<div class="msg verified"><div class="meta"><b>' + esc(e.name) + '</b></div><div class="bubble"><div class="vtag">' + ic('check', 'sm') + esc(e.role[S.lang]) + '</div>' + esc(txt) + '</div></div>';
       }).join('') + (S.expTyping === e.id ? '<div class="typing"><span></span><span></span><span></span></div>' : '') + '</div>' +
       '<form class="composer" id="ask-form">' + (chips ? '<div class="chips stack">' + chips + '</div>' : '') +
-        '<div class="inputrow"><input id="ask-input" autocomplete="off" placeholder="' + t('placeholder') + '" aria-label="' + t('placeholder') + '"><button class="send" type="submit" aria-label="Send">' + ic('send') + '</button></div></form>' +
+        '<div class="inputrow"><input id="ask-input" autocomplete="off" placeholder="' + t('placeholder') + '" aria-label="' + t('placeholder') + '"><button class="send" type="button" aria-label="Send">' + ic('send') + '</button></div></form>' +
       '<p class="fine">' + t('fine') + '</p></div>';
   }
 
@@ -715,6 +734,7 @@ svg.i.sm { width: 14px; height: 14px; }
     if (d.lang) { S.lang = d.lang; try { localStorage.setItem('gc-lang', d.lang); } catch (e) {} render(true); return; }
     if (d.go) { if (d.go === 'resources') S.guide = null; go(d.go); return; }
     if (d.guide) { S.guide = d.guide; render(false); return; }
+    if (d.openguide) { var gr = RES.filter(function (r) { return r.id === d.openguide; })[0]; S.resCat = gr.cat; S.guide = gr.id; go('resources'); return; }
     if (d.resback) { S.guide = null; render(false); return; }
     if (d.askexp) { S.expert = d.askexp; go('experts'); return; }
     if (d.add) {
@@ -741,21 +761,33 @@ svg.i.sm { width: 14px; height: 14px; }
     }
   });
 
-  document.addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    var f = ev.target;
-    if (f.id === 'post-form') {
+  function sendFrom(formId) {
+    if (formId === 'post-form') {
       var inp = document.getElementById('post-input'); var v = inp.value.trim(); if (!v) return;
       inp.value = '';
-      var isHello = /\b(hi|hey|hello|hola|new here|how are you|what do you)\b|হ্যালো|সালাম|নমস্কার|কেমন আছেন/i.test(v);
-      postCommunity({ mine: true, custom: v }, isHello ? WELCOME : []);
+      var isMed = /\b(medical|medicine|doctor|clinic|insurance|insured|hospital|health ?care|sick|médic\w*|seguro|clínica|salud|enfermo)\b|ডাক্তার|চিকিৎসা|বিমা|হাসপাতাল|স্বাস্থ্য|অসুস্থ/i.test(v);
+      var isHello = /\b(hi|hey|hello|hola|buenas|new here|how are you|what do you|my name is|me llamo)\b|হ্যালো|সালাম|নমস্কার|কেমন আছেন|আমার নাম/i.test(v);
+      postCommunity({ mine: true, custom: v }, isMed ? MEDICAL : isHello ? WELCOME : []);
     } else if (f.id === 'ask-form') {
       var ai = document.getElementById('ask-input'); var av = ai.value.trim(); if (!av) return;
       ai.value = '';
       var e = EXPERTS.filter(function (x) { return x.id === S.expert; })[0];
       askExpert(e, { mine: true, custom: av }, EXPERT_GENERIC);
     }
+  }
+  // Send on the arrow button or Enter, handled directly so it works in every viewer.
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('.send');
+    if (!b) return;
+    ev.preventDefault();
+    var f = b.closest('form'); if (f) sendFrom(f.id);
   });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Enter' || ev.isComposing || ev.keyCode === 229) return;
+    var id = ev.target && ev.target.id;
+    if (id === 'post-input' || id === 'ask-input') { ev.preventDefault(); sendFrom(id === 'post-input' ? 'post-form' : 'ask-form'); }
+  });
+  document.addEventListener('submit', function (ev) { ev.preventDefault(); });
 
 
   /* ---------- Onboarding (welcome → language → name → borough & apps → all set) ---------- */
