@@ -491,6 +491,20 @@ svg.i.sm { width: 14px; height: 14px; }
           a: { en: 'NYC app drivers may be covered by the Black Car Fund for on-the-job injuries. Get medical care first, then I can help you file a claim.', bn: 'NYC-র অ্যাপ চালকরা কাজের সময় আঘাতের জন্য Black Car Fund-এর আওতায় থাকতে পারেন। আগে চিকিৎসা নিন, তারপর ক্লেইম করতে আমি সাহায্য করব।', es: 'Los conductores de apps en NYC pueden estar cubiertos por el Black Car Fund por lesiones en el trabajo. Primero busca atención médica y luego te ayudo a presentar el reclamo.' } }
       ] }
   ];
+  // Health navigator: when the driver says where they live, she offers to find the nearest clinic there.
+  var LOCATION_RE = /\b(near|live|living|around|close to|zip|queens|bronx|brooklyn|manhattan|staten|jamaica|flushing|astoria|harlem|cerca|vivo)\b|\b\d{5}\b|কাছে|থাকি/i;
+  function locateReply(text) {
+    var m = text.match(/\b(?:near|around|close to|by|in|cerca de|vivo en|en)\s+(?:the\s+)?([^.!?,]+(?:,\s*[^.!?]+)?)/i);
+    var place = m ? m[1].replace(/\b(area|neighborhood|please|thanks|thank you)\b/gi, '').replace(/[.!?\s]+$/, '').trim() : '';
+    if (place && /[a-z]/i.test(place)) {
+      var words = place.replace(/,/g, ' ').split(/\s+/).filter(Boolean).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); });
+      var last = words[words.length - 1];
+      place = words.length > 1 && /^(Queens|Bronx|Brooklyn|Manhattan)$/.test(last) ? words.slice(0, -1).join(' ') + ', ' + last : words.join(' ');
+      place = place.replace(/(^|, )Bronx$/, '$1the Bronx');
+    }
+    if (!place) return { en: 'Yes, I’ll locate the clinic closest to you. Please give me a moment.', es: 'Sí, voy a buscar la clínica más cercana a ti. Dame un momento, por favor.', bn: 'জি, আপনার সবচেয়ে কাছের ক্লিনিকটি খুঁজে দিচ্ছি। একটু অপেক্ষা করুন।' };
+    return { en: 'Yes, I’ll locate the clinic closest to ' + place + '. Please give me a moment.', es: 'Sí, voy a buscar la clínica más cercana a ' + place + '. Dame un momento, por favor.', bn: 'জি, ' + place + '-এর সবচেয়ে কাছের ক্লিনিকটি খুঁজে দিচ্ছি। একটু অপেক্ষা করুন।' };
+  }
   var EXPERT_GENERIC = { en: 'Thanks. I’ll answer here within a few hours, in your language.', bn: 'ধন্যবাদ। কয়েক ঘণ্টার মধ্যে আপনার ভাষায় এখানে উত্তর দেব।', es: 'Gracias. Te respondo aquí en unas horas, en tu idioma.' };
 
   var S = {
@@ -768,11 +782,11 @@ svg.i.sm { width: 14px; height: 14px; }
       var isMed = /\b(medical|medicine|doctor|clinic|insurance|insured|hospital|health ?care|sick|médic\w*|seguro|clínica|salud|enfermo)\b|ডাক্তার|চিকিৎসা|বিমা|হাসপাতাল|স্বাস্থ্য|অসুস্থ/i.test(v);
       var isHello = /\b(hi|hey|hello|hola|buenas|new here|how are you|what do you|my name is|me llamo)\b|হ্যালো|সালাম|নমস্কার|কেমন আছেন|আমার নাম/i.test(v);
       postCommunity({ mine: true, custom: v }, isMed ? MEDICAL : isHello ? WELCOME : []);
-    } else if (f.id === 'ask-form') {
+    } else if (formId === 'ask-form') {
       var ai = document.getElementById('ask-input'); var av = ai.value.trim(); if (!av) return;
       ai.value = '';
       var e = EXPERTS.filter(function (x) { return x.id === S.expert; })[0];
-      askExpert(e, { mine: true, custom: av }, EXPERT_GENERIC);
+      askExpert(e, { mine: true, custom: av }, e.id === 'health' && LOCATION_RE.test(av) ? locateReply(av) : EXPERT_GENERIC);
     }
   }
   // Send on the arrow button or Enter, handled directly so it works in every viewer.
